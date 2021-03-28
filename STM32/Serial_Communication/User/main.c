@@ -18,7 +18,10 @@
  
 #include "stm32f10x.h"
 #include "bsp_usart.h"
+#include "bsp_led.h"
+#define SOFT_DELAY Delay(5000000);
 
+void Delay(__IO uint32_t nCount); 
 
 /**
   * @brief  主函数
@@ -29,9 +32,19 @@ int main(void)
 {	
   /*初始化USART 配置模式为 115200 8-N-1，中断接收*/
   USART_Config();
+	/* LED 端口初始化 */
+	LED_GPIO_Config();	 
 	
   while(1)
 	{	
+		// 蓝灯闪烁表示系统正常运行
+		LED3_OFF;
+		SOFT_DELAY;
+		LED3_ON;
+		SOFT_DELAY;
 	}
 }
+
+void Delay(__IO uint32_t nCount)	 //简单的延时函数
+{ for(; nCount != 0; nCount--);}
 /*********************************************END OF FILE**********************/

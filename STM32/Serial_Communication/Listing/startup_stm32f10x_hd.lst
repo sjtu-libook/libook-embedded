@@ -553,12 +553,12 @@ ARM Macro Assembler    Page 9
               00000000 
 Command Line: --debug --xref --diag_suppress=9931 --cpu=Cortex-M3 --apcs=interw
 ork --depend=..\..\output\startup_stm32f10x_hd.d -o..\..\output\startup_stm32f1
-0x_hd.o -ID:\Desktop\1-书籍配套例程\21-USART—串口通信\USART1接发\Project\RVMDK
-（uv5）\RTE -ID:\software\Keil_v5\ARM\PACK\Keil\STM32F1xx_DFP\2.0.0\Device\Incl
-ude -ID:\software\Keil_v5\ARM\CMSIS\Include --predefine="__MICROLIB SETA 1" --p
-redefine="__UVISION_VERSION SETA 515" --predefine="STM32F10X_HD SETA 1" --list=
-..\..\listing\startup_stm32f10x_hd.lst ..\..\Libraries\CMSIS\startup\startup_st
-m32f10x_hd.s
+0x_hd.o -ID:\Desktop\libook-embedded\STM32\Serial_Communication\Project\RVMDK（
+uv5）\RTE -ID:\software\Keil_v5\ARM\PACK\Keil\STM32F1xx_DFP\2.0.0\Device\Includ
+e -ID:\software\Keil_v5\ARM\CMSIS\Include --predefine="__MICROLIB SETA 1" --pre
+define="__UVISION_VERSION SETA 515" --predefine="STM32F10X_HD SETA 1" --list=..
+\..\listing\startup_stm32f10x_hd.lst ..\..\Libraries\CMSIS\startup\startup_stm3
+2f10x_hd.s
 
 
 
