@@ -2,7 +2,7 @@
 
 ### 串口通信
 
-路径：[/Serial_Communication](https://github.com/zhliuworks/libook-embedded/STM32/Serial_Communication)
+路径：[/Serial_Communication](https://github.com/zhliuworks/libook-embedded/tree/master/STM32/Serial_Communication)
 
 解释：[@yangco-le](https://github.com/yangco-le)
 
