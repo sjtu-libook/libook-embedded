@@ -10,11 +10,6 @@ class CommunicateServer():
         self.url_base = url_base
         self.api_key = api_key
         self.device_id = device_id
-        self.headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) '
-                        'AppleWebKit/537.36 (KHTML, like Gecko) '
-                        'Chrome/53.0.2785.104 '
-                        'Safari/537.36 Core/1.53.4843.400 '
-                        'QQBrowser/9.7.13021.400'}
 
     def get(self):
         ''' Get reservation data of the current hour and device'''
@@ -22,19 +17,28 @@ class CommunicateServer():
         from_time = datetime.now() - timedelta(hours=1)
         to_time = datetime.now() + timedelta(hours=1)
 
-        from_time = quote(from_time.astimezone().isoformat(), 'utf-8')
-        to_time = quote(to_time.astimezone().isoformat(), 'utf-8')
-        url = f'{self.url_base}/api/devices/{self.device_id}?api_key={self.api_key}&fake=false&from_time={from_time}&to_time={to_time}'
+        # from_time = quote(from_time.astimezone().isoformat(), 'utf-8')
+        # to_time = quote(to_time.astimezone().isoformat(), 'utf-8')
+        # url = f'{self.url_base}/api/devices/{self.device_id}?api_key={self.api_key}&fake=false&from_time={from_time}&to_time={to_time}'
+
+        url = f'{self.url_base}/api/devices/{self.device_id}'
+        params = {'api_key': self.api_key, 'fake': False,
+                  'from_time': from_time, 'to_time': to_time}
 
         try:
-            response = requests.get(url, headers=self.headers)
-            length = len(response.json())
+            # response = requests.get(url)
+
+            response = requests.get(url, params=params)
+            data = response.json()
+            length = len(data)
             if length == 0:
                 return {'message': 'No Reservation!'}
             elif length != 1:
+                # Comment from @skyzh:
+                # length 可能不为 1。同一个区域可能有多个人预约。但我们可以暂时不处理这种情况，或者只按照预约 ID 最小的人（首个预约的人）进行之后的流程。
                 return {'message': 'Get Wrong Data From Server!'}
-            reservation_id = response.json()[0]['id']
-            user_id = response.json()[0]['user']['id']
+            reservation_id = data[0]['id']
+            user_id = data[0]['user']['id']
             return {'message': 'Success', 'reservation_id': reservation_id, 'user_id': user_id}
 
         except requests.exceptions.ConnectionError:
@@ -43,6 +47,8 @@ class CommunicateServer():
     def post(self, fingerprint_id, token, reservation_id, user_id):
         ''' Post user input to the server '''
 
+        # Comment from @skyzh:
+        # 这里建议分成两个函数：一个用来更新用户信息，一个用来确认用户的预约。前者需要 user_id, token, fingerprint_id，后者只需要 reservation_id。
         url = f'{self.url_base}/api/devices/{self.device_id}'
         if token:
             params = {'fingerprint_id': fingerprint_id, 'token': token,
@@ -55,9 +61,9 @@ class CommunicateServer():
             response = requests.post(url, data=params)
             if response.status_code == 200:
                 return True
-            else
-            return False
-        except:
+            else:
+                return False
+        except requests.exceptions.ConnectionError:
             return False
 
 
@@ -65,6 +71,9 @@ class CommunicateSTM32():
     ''' API of Serial Communication between Raspi and STM32 '''
 
     # TODO @yangco-le 郦洋
+    # Comment from @skyzh:
+    # pyserial 支持 async / await，可以评估一下有没有可能把整个程序的架构都换成 async / await 的模式，可以避免多线程产生的各种问题（
+    # https://github.com/pyserial/pyserial-asyncio
 
     def __init__(self):
         pass
