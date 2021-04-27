@@ -14,14 +14,12 @@
   *
   ******************************************************************************
   */ 
-	
-#include "bsp_usart.h"
 
- /**
-  * @brief  配置嵌套向量中断控制器NVIC
-  * @param  无
-  * @retval 无
-  */
+#include "bsp_usart.h"
+#include "sys.h"
+
+
+
 static void NVIC_Configuration(void)
 {
   NVIC_InitTypeDef NVIC_InitStructure;
@@ -39,6 +37,7 @@ static void NVIC_Configuration(void)
   NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
   /* 初始化配置NVIC */
   NVIC_Init(&NVIC_InitStructure);
+
 }
 
  /**
