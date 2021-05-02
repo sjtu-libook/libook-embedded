@@ -13,7 +13,7 @@ parser.add_argument('device_id', type=int, help='Device ID')
 parser.add_argument('api_key', type=str, help='API Key')
 args = parser.parse_args()
 
-URL_BASE = 'https://libook.skyzh.dev'
+URL_BASE = 'https://api.libook.skyzh.dev'
 BEGIN_HOUR = 7
 END_HOUR = 23
 BEGIN_HOUR_WEEKEND = 8
