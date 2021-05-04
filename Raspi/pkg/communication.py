@@ -25,10 +25,11 @@ class CommunicateServer():
         try:
             response = requests.get(url, params=params)
             data = response.json()
+            data = list(filter(lambda x: x['user']['username'][:5] == 'sjtu-', data))
             length = len(data)
             if length == 0:
                 return {'message': 'No Reservation!'}
-            reservation_id = data[0]['id']
+            reservation_id = data[0]['id']  # 默认处理首位预约的用户
             user_id = data[0]['user']['id']
             return {'message': 'Success', 'reservation_id': reservation_id, 'user_id': user_id}
 
@@ -61,7 +62,6 @@ class CommunicateServer():
 class CommunicateSTM32():
     ''' API of Serial Communication between Raspi and STM32 '''
 
-    # TODO @yangco-le 郦洋
     # Comment from @skyzh:
     # pyserial 支持 async / await，可以评估一下有没有可能把整个程序的架构都换成 async / await 的模式，可以避免多线程产生的各种问题（
     # https://github.com/pyserial/pyserial-asyncio
