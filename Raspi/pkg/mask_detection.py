@@ -1,4 +1,3 @@
-# Your imports
 import cv2
 import numpy as np
 import keras
@@ -12,17 +11,15 @@ from keras.preprocessing import image
 class MaskDetector():
     ''' mask detection and temperature display '''
 
-    # TODO @initializer-z 朱祥辉
-
     def __init__(self, stm32):
         '''
             stm32: CommunicateSTM32()
         '''
         self.stm32 = stm32
         self.face_cascade = cv2.CascadeClassifier(
-            'haarcascade_frontalface_default.xml')
+            'model/haarcascade_frontalface_default.xml')
         self.cap = cv2.VideoCapture(0)
-        self.mymodel = load_model('mymodel.h5')
+        self.mymodel = load_model('model/mask_detection_model.h5')
         self.on = False
 
     def seton(self):
@@ -42,12 +39,11 @@ class MaskDetector():
                 frame, scaleFactor=1.1, minNeighbors=4)
             for (x, y, w, h) in face:
                 face_img = frame[y:y + h, x:x + w]
-                # print(type(face_img))
+                #target_size = (150, 150)
+                #test_image = cv2.resize(face_img, target_size)
                 cv2.imwrite('temp.jpg', face_img)
                 test_image = image.load_img(
                     'temp.jpg', target_size=(150, 150, 3))
-                # print(type(face_img))
-                # test_image = np.reshape(face_img, (150,150,3))
                 test_image = image.img_to_array(test_image)
                 test_image = np.expand_dims(test_image, axis=0)
                 pred = self.mymodel.predict_classes(test_image)[0][0]

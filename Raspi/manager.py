@@ -5,12 +5,9 @@ from threading import Thread
 from pkg.communication import CommunicateSTM32, CommunicateServer
 from pkg.mask_detection import MaskDetector
 
-# Simulate STM32 datastream if `CommunicateSTM32` Class NOT finished (for debugging)
-from pkg.simulate_stm32 import Simulator
-
 parser = argparse.ArgumentParser(description='Initialize manager.')
-parser.add_argument('device_id', type=int, help='Device ID')
-parser.add_argument('api_key', type=str, help='API Key')
+parser.add_argument('--device_id', type=int, help='Device ID')
+parser.add_argument('--api_key', type=str, help='API Key')
 args = parser.parse_args()
 
 URL_BASE = 'https://api.libook.skyzh.dev'
@@ -19,7 +16,7 @@ END_HOUR = 23
 BEGIN_HOUR_WEEKEND = 8
 END_HOUR_WEEKEND = 22
 DEVICE_ID = args.device_id
-API_KEY = args.api_key  # 'SA4vnQjbbm'
+API_KEY = args.api_key
 
 
 while True:
@@ -66,12 +63,14 @@ while True:
             print('Fail to post!')
             continue
 
+        # Start mask detection and temperature display
+        maskDetector = MaskDetector(comSTM32)
+        maskDetector.seton()
+        t = Thread(target=maskDetector.start)
+        t.start()
+
         ''' While Seated '''
         while True:
-            # Start mask detection and temperature display
-            maskDetector = MaskDetector(comSTM32)
-            t = Thread(target=maskDetector.start)
-            t.start()
 
             # Check whether the user is going to leave (actively)
             if comSTM32.is_leave:
