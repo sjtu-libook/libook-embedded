@@ -18,7 +18,7 @@
 
   ```shell
   pip install pipreqs
-  pipreqs . --encoding=utf8
+  pipreqs . --force --encoding=utf8
   ```
 
 ## Directory Structure
@@ -27,7 +27,8 @@
 
   ```shell
   python manager.py [device_id] [api_key]
-  # e.g. python manager.py 1 abCdEf
+  # e.g. python manager.py --device_id 1 --api_key abCdEf
+  # For security, api_key is not public.
   ```
 
 * `pkg/communication.py` ：Raspi 与 Server 和 STM32 的通信 API
@@ -35,5 +36,3 @@
   * `CommunicateSTM32` ：Raspi 和 STM32 之间的串口通信 API
   
 * `pkg/mask_detection.py` ：口罩检测控制器，负责拍摄照片、口罩检测、显示照片和温度至显示屏
-
-* `pkg/simulate_stm32.py`：模拟 STM32 发来的数据，在 debug 时可代替 CommunicateSTM32 类
