@@ -73,7 +73,7 @@ while True:
         while True:
 
             # Check whether the user is going to leave (actively)
-            if comSTM32.is_leave:
+            if comSTM32.is_leave():
                 print('This user is leaving.')
                 maskDetector.end()
                 t.join()

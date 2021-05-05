@@ -2,6 +2,7 @@ import requests
 from datetime import datetime, timedelta
 import serial
 import asyncio
+import time
 
 
 class CommunicateServer():
@@ -67,7 +68,7 @@ class CommunicateSTM32():
     # https://github.com/pyserial/pyserial-asyncio
 
     def __init__(self):
-        self.PORT = '/dev/ttyAMA0'  # 串口号
+        self.PORT = 'COM3'  # 串口号
         self.BAUDRATE = 115200  # 波特率
         self.open_ser()
 
@@ -126,14 +127,13 @@ class CommunicateSTM32():
             msg = self.read_msg()
             # message格式： 1. "True{tocken}" 首次落座   2. "False" 非首次落座  3. "Null" 未落座
             if msg != 'Null':
-                break
+                time.sleep(1)
+            if msg == 'False':
+                return False, ''
+            if msg[0: 4] == 'True':
+                return True, msg[5:]
 
-        if msg == 'False':
-            return False, ''
-        if msg[0: 4] == 'True':
-            return True, msg[5:]
-
-    async def get_fingerprint_id(self):
+    def get_fingerprint_id(self):
         ''' Return fingerprint id created by STM32 '''
         # 注意：
         # 1. 如果用户首次落座，需要等待 STM32 录入指纹，然后返回新创建的指纹 ID
@@ -144,11 +144,11 @@ class CommunicateSTM32():
             msg = self.read_msg()
             # message格式： 1. "Suc{id}" 返回ID  2. "Null" ID尚未准备
             if msg == 'Null':
-                await asyncio.sleep(3)
+                time.sleep(1)
             elif msg[0: 3] == 'Suc':
                 return int(msg[3:])
 
-    async def get_temperature(self):
+    def get_temperature(self):
         ''' Return temperature collected by STM32 '''
         # 注意：
         # 1. 获取 STM32 发来的温度数据（浮点数）
@@ -162,7 +162,7 @@ class CommunicateSTM32():
         else:
             return float(msg[5:])
 
-    async def is_leave(self):
+    def is_leave(self):
         ''' Return True if the user is going to leave '''
         # 注意：
         # 1. 如果用户主动希望离开（点击 STM32 某个按键），此函数返回 True

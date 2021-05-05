@@ -26,6 +26,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f10x_it.h"
 #include "bsp_usart.h"
+#include <string.h>
 /** @addtogroup STM32F10x_StdPeriph_Template
   * @{
   */
@@ -138,16 +139,58 @@ void SysTick_Handler(void)
 {
 }
 
+receive_stack rx_stack;
+
+void rx_stack_init()
+{
+    rx_stack.head = '!';         //????,???
+    memset(rx_stack.data, 's', sizeof(rx_stack.data));//?tx_stack.data[]???????
+	  rx_stack.tail = '~';         //????,???
+    rx_stack.data_pt = 0;
+    rx_stack.lock_flag = 0;
+}
+
 // 串口中断服务函数
 void DEBUG_USART_IRQHandler(void)
 {
-  uint8_t ucTemp;
-	if(USART_GetITStatus(DEBUG_USARTx,USART_IT_RXNE)!=RESET)
-	{		
-		ucTemp = USART_ReceiveData(DEBUG_USARTx);
-    //USART_SendData(DEBUG_USARTx,ucTemp);
-		Usart_SendString( DEBUG_USARTx,"asdsdsd\n");
-	}	 
+  //uint8_t ch;
+	//if(USART_GetITStatus(DEBUG_USARTx,USART_IT_RXNE)!=RESET)
+	//{		
+	//	ch = USART_ReceiveData(DEBUG_USARTx);
+	//	printf("%c", ch);
+		//ucTemp = USART_ReceiveData(DEBUG_USARTx);
+    // USART_SendData(DEBUG_USARTx,ucTemp);
+		//Usart_SendString( DEBUG_USARTx, ucTemp);
+	//}	 
+	u8 receive_data;
+	if(USART_GetITStatus(DEBUG_USARTx, USART_IT_RXNE) != RESET) //??????????
+	{
+			receive_data = USART_ReceiveData(DEBUG_USARTx);         //???????????
+			if(rx_stack.lock_flag == 0)                   //??????????
+			{
+					if(receive_data == '!')
+					{
+							rx_stack.head = receive_data;
+					}
+					else if(receive_data == '~')
+					{
+							rx_stack.tail = receive_data;
+							rx_stack.data_pt = 0;
+							rx_stack.lock_flag = 1;
+					}
+					else
+					{
+							rx_stack.data[rx_stack.data_pt] = receive_data;
+							rx_stack.data_pt++;
+							if(rx_stack.data_pt > 5)// && (rx_stack.tail == 0xdd))
+							{
+									rx_stack.data_pt = 0;
+									rx_stack.lock_flag = 1;
+							}
+					}
+			}
+			USART_ClearITPendingBit(DEBUG_USARTx, USART_IT_RXNE);//????????
+	}
 }
 
 /**

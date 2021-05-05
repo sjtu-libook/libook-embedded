@@ -17,6 +17,7 @@
 
 #include "bsp_usart.h"
 #include "sys.h"
+#include <string.h>
 
 
 
@@ -173,4 +174,32 @@ int fgetc(FILE *f)
 
 		return (int)USART_ReceiveData(DEBUG_USARTx);
 }
+
+send_stack tx_stack;
+
+void tx_stack_init()
+{
+    tx_stack.head = '1';     //协议栈头，起始位，1010 1010b
+    tx_stack.direction = '5';//数据流方向，5表示从单片机发出
+    memset(tx_stack.data, 's', sizeof(tx_stack.data));//把tx_stack.data[]全部初始化为s
+    tx_stack.tail = 'N';     //协议栈尾，结束位，1101 1101b，栈头和栈尾最好能互补
+}
+
+void usart_senddata(send_stack tx_stack)
+{
+    u8 i;
+    while(USART_GetFlagStatus(USART1, USART_FLAG_TXE) == RESET);
+    USART_SendData(USART1, tx_stack.head);
+    while(USART_GetFlagStatus(USART1, USART_FLAG_TXE) == RESET);
+    USART_SendData(USART1, tx_stack.direction);
+    while(USART_GetFlagStatus(USART1, USART_FLAG_TXE) == RESET);
+    for(i = 0; i < 20; i++)
+    {
+        USART_SendData(USART1, tx_stack.data[i]);
+        while(USART_GetFlagStatus(USART1, USART_FLAG_TXE) == RESET);
+    }
+    USART_SendData(USART1, tx_stack.tail);
+    while(USART_GetFlagStatus(USART1, USART_FLAG_TXE) == RESET);
+}
+
 

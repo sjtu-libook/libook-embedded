@@ -17,6 +17,7 @@
  
  
 #include "stm32f10x.h"
+#include "stm32f10x_it.h"
 #include "bsp_usart.h"
 #include "bsp_led.h"
 #include "delay.h"
@@ -48,15 +49,40 @@ int main(void)
 	LED_GPIO_Config();	 
 	delay_init();
 	SMBus_Init();
-	
+	tx_stack_init();
+	rx_stack_init();
 	
   while(1)
 	{	
-		Temperature = SMBus_ReadTemp();
-		printf("Temperature = %f\r\n",Temperature);	//在串口调试助手上打印结果
-		delay_ms(100);//不加延时在电脑串口助手上看不到效果
-		sprintf(TempValue,"%.1f", Temperature); //浮点转换为字符串	
+		//Temperature = SMBus_ReadTemp();
+		//printf("Temperature = %f\r\n",Temperature);	//在串口调试助手上打印结果
+		//delay_ms(100);//不加延时在电脑串口助手上看不到效果
+		//sprintf(TempValue,"%.1f", Temperature); //浮点转换为字符串	
 		// 蓝灯闪烁表示系统正常运行
+		
+		if(rx_stack.lock_flag == 1) {
+			if (rx_stack.data[0] == 'r' && rx_stack.data[1] == 'e' && rx_stack.data[2] == 'q') {
+				if (rx_stack.data[3] == '0' && rx_stack.data[4] == '0') {
+					// get token
+					printf("True%d", 123456);
+				}
+				else if (rx_stack.data[3] == '0' && rx_stack.data[4] == '1') {
+					// get fingerprint id
+					printf("Suc%d", 1);
+				}
+				else if (rx_stack.data[3] == '1' && rx_stack.data[4] == '0') {
+					// get temperature
+					Temperature = SMBus_ReadTemp();
+		      printf("Temp%f", Temperature);
+				}
+				else if (rx_stack.data[3] == '1' && rx_stack.data[4] == '1') {
+					// is_leave
+					printf("False");
+				}
+			}
+			rx_stack.lock_flag = 0;
+		}
+		delay_ms(100);	
 		LED3_OFF;
 		SOFT_DELAY;
 		LED3_ON;

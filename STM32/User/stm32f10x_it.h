@@ -44,6 +44,16 @@ void SVC_Handler(void);
 void DebugMon_Handler(void);
 void PendSV_Handler(void);
 void SysTick_Handler(void);
+typedef struct
+{
+    u8 head;
+    u8 tail;
+    u8 data[5];
+    u8 lock_flag;
+    u8 data_pt;
+}receive_stack;
+extern receive_stack rx_stack;
+void rx_stack_init();
 
 #ifdef __cplusplus
 }

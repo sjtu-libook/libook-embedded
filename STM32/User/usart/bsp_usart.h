@@ -117,5 +117,15 @@ void USART_Config(void);
 void Usart_SendByte( USART_TypeDef * pUSARTx, uint8_t ch);
 void Usart_SendString( USART_TypeDef * pUSARTx, char *str);
 void Usart_SendHalfWord( USART_TypeDef * pUSARTx, uint16_t ch);
+typedef struct
+{
+    u8 head;
+    u8 tail;
+    u8 direction;
+    u8 data[20];
+}send_stack;
+extern send_stack tx_stack;
+void tx_stack_init();
+void usart_senddata(send_stack tx_stack);
 
 #endif /* __USART_H */
