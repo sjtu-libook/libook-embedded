@@ -68,7 +68,7 @@ class CommunicateSTM32():
     # https://github.com/pyserial/pyserial-asyncio
 
     def __init__(self):
-        self.PORT = 'COM3'  # 串口号
+        self.PORT = '/dev/ttyUSB0'  # 串口号
         self.BAUDRATE = 115200  # 波特率
         self.open_ser()
 
@@ -123,7 +123,7 @@ class CommunicateSTM32():
         # 3. 如果用户非首次落座，也返回一个二元组，例如 (False, '')，元组第二项为空字符串
         # 4. 树莓派主控程序将直接调用该函数获取用户的输入
         while True:
-            self.send_msg('req00')
+            self.send_msg('!req00~')
             msg = self.read_msg()
             # message格式： 1. "True{tocken}" 首次落座   2. "False" 非首次落座  3. "Null" 未落座
             if msg != 'Null':
@@ -131,7 +131,7 @@ class CommunicateSTM32():
             if msg == 'False':
                 return False, ''
             if msg[0: 4] == 'True':
-                return True, msg[5:]
+                return True, msg[4:]
 
     def get_fingerprint_id(self):
         ''' Return fingerprint id created by STM32 '''
@@ -140,7 +140,7 @@ class CommunicateSTM32():
         # 2. 如果用户非首次落座，需要返回验证成功的指纹 ID
         # 3. 此函数也需要阻塞，直到用户完成操作
         while True:
-            self.send_msg('req01')
+            self.send_msg('!req01~')
             msg = self.read_msg()
             # message格式： 1. "Suc{id}" 返回ID  2. "Null" ID尚未准备
             if msg == 'Null':
@@ -153,21 +153,21 @@ class CommunicateSTM32():
         # 注意：
         # 1. 获取 STM32 发来的温度数据（浮点数）
         # 2. 树莓派总控程序会以一定频率调用该函数
-        self.send_msg('req10')
+        self.send_msg('!req10~')
         msg = self.read_msg()
         # message格式: "Temp{t}"
-        if msg[0: 5] != 'Temp':
+        if msg[0: 4] != 'Temp':
             print("返回温度异常")
             return
         else:
-            return float(msg[5:])
+            return float(msg[4:])
 
     def is_leave(self):
         ''' Return True if the user is going to leave '''
         # 注意：
         # 1. 如果用户主动希望离开（点击 STM32 某个按键），此函数返回 True
         # 2. 否则应该始终返回 False
-        self.send_msg('req11')
+        self.send_msg('!req11~')
         msg = self.read_msg()
         # message格式: "True" "False"
         if msg == 'True':
