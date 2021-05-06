@@ -31,6 +31,8 @@ class MaskDetector():
     def start(self):
         ''' Start mask detection and temperature display, which serves as the main function of this class '''
         while self.on and self.cap.isOpened():
+            temperature = self.stm32.get_temperature()
+
             # photos, my_face_encodings = faceencoding()
             _, frame = self.cap.read()
             frame = cv2.flip(frame, 1)
@@ -55,6 +57,9 @@ class MaskDetector():
                         frame, (x, y), (x + w, y + h), (0, 255, 0), 3)
                     cv2.putText(frame, 'MASK', ((x + w) // 2, y + h + 20),
                                 cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 3)
+            cv2.putText(frame, 'Temperature: ' + str(temperature),
+                        ((x + w) // 2, y + h + 50), cv2.FONT_HERSHEY_SIMPLEX,
+                        0.7, (128, 128, 0), 2)
             cv2.imshow("Recognition", frame)
             key = cv2.waitKey(6) & 0xFF
             if key == 27:
