@@ -1,21 +1,4 @@
-/**
-  ******************************************************************************
-  * @file    main.c
-  * @author  fire
-  * @version V1.0
-  * @date    2013-xx-xx
-  * @brief   串口中断接收测试
-  ******************************************************************************
-  * @attention
-  *
-  * 实验平台:野火 F103-指南者 STM32 开发板 
-  * 论坛    :http://www.firebbs.cn
-  * 淘宝    :https://fire-stm32.taobao.com
-  *
-  ******************************************************************************
-  */ 
- 
- 
+
 #include "stm32f10x.h"
 #include "stm32f10x_it.h"
 #include "bsp_usart.h"
@@ -54,35 +37,41 @@ int main(void)
 	
   while(1)
 	{	
-		//Temperature = SMBus_ReadTemp();
-		//printf("Temperature = %f\r\n",Temperature);	//在串口调试助手上打印结果
-		//delay_ms(100);//不加延时在电脑串口助手上看不到效果
-		//sprintf(TempValue,"%.1f", Temperature); //浮点转换为字符串	
-		// 蓝灯闪烁表示系统正常运行
-		
+		// 中断处理程序接收请求，接收到的数据存在rx_stack接收栈中
+		// 接收格式为"!req[01][01]~"，其中'!'放入开始位，'~'放入结束位，中间值放在rx_stack.data中
+		// rx_stack.lock_flag标识中断处理程序接收请求完成，进入锁状态
 		if(rx_stack.lock_flag == 1) {
-			if (rx_stack.data[0] == 'r' && rx_stack.data[1] == 'e' && rx_stack.data[2] == 'q') {
+			if (rx_stack.data[0] == 'r' && rx_stack.data[1] == 'e' && rx_stack.data[2] == 'q') { 
 				if (rx_stack.data[3] == '0' && rx_stack.data[4] == '0') {
 					// get token
-					printf("True%d", 123456);
+					// 返回message格式： 1. "True{tocken}" 首次落座   2. "False" 非首次落座  3. "Null" 未落座
+					// 通过get_token函数来获取token，成功失败对应上面的消息格式返回，都是字符串形式返回
+					printf("True%d", 123456); // 这里为了测试固定返回值（偷懒）
 				}
 				else if (rx_stack.data[3] == '0' && rx_stack.data[4] == '1') {
 					// get fingerprint id
+					// 返回message格式： 1. "Suc{id}" 返回ID  2. "Null" ID尚未准备
 					printf("Suc%d", 1);
 				}
 				else if (rx_stack.data[3] == '1' && rx_stack.data[4] == '0') {
 					// get temperature
+					// 返回message格式: "Temp{t}"
+					// 这部分已经完成了，已完成获取温度的api，这里直接调用，按照格式返回
 					Temperature = SMBus_ReadTemp();
 		      printf("Temp%f", Temperature);
 				}
 				else if (rx_stack.data[3] == '1' && rx_stack.data[4] == '1') {
 					// is_leave
+					// message格式: "True"离开 "False"未离开
+					// 只需要有一个变量保存状态即可，需要时返回
 					printf("False");
 				}
 			}
 			rx_stack.lock_flag = 0;
 		}
+		// 通信顺畅要求
 		delay_ms(100);	
+		// 蓝灯闪烁表示系统正常运行
 		LED3_OFF;
 		SOFT_DELAY;
 		LED3_ON;
