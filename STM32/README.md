@@ -12,3 +12,8 @@
 
 解释：[@SanqingQi](https://github.com/SanqingQi)
 
+### 指纹识别
+
+解释：[@ljh2000](https://github.com/ljh2000)
+
+Code
