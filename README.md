@@ -19,28 +19,28 @@ Embedded end of ***Libook***, an open-source library seat booking system in the 
 ## Our Work
 
 
-<center><h4>Features Overview : A User's Perspective</h4></center>
+### Features Overview : A User's Perspective
 
 <p align="center"><img src=".imgs/features.png"/></p>
 
 ---
 
 
-<center><h4>Human-Machine Interaction Workflow</h4></center>
+### Human-Machine Interaction Workflow
 
 <p align="center"><img src=".imgs/workflow.png"/></p>
 
 ---
 
 
-<center><h4>Embedded-end Architecture</h4></center>
+### Embedded-end Architecture
 
 <p align="center"><img src=".imgs/seat-arch.png"/></p>
 
 ---
 
 
-<center><h4>Multi-device Organization</h4></center>
+### Multi-device Organization
 
 <p align="center"><img src=".imgs/device-arch.png"/></p>
 
