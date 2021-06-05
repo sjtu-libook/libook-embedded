@@ -35,7 +35,98 @@ u16 GET_NUM(void);//获取数值
 
 int main(void)
 {		 
-	
+	u8 ensure;
+	u8 key_num;
+	char *str;	
+
+  Stm32_Clock_Init(9);	//系统时钟设置
+	delay_init(72);			  //延时初始化
+	uart_init(72,115200); //串口1初始化，用于支持USMART  	  
+	LCD_Init();						//初始化液晶 
+	KEY_Init();						//按键初始化	  													    
+	usmart_dev.init(72);	//usmart初始化	
+ 	usart2_init(36,usart2_baund);	//初始化串口2,用于与指纹模块通讯
+	PS_StaGPIO_Init();	  //初始化FR读状态引脚	
+	tp_dev.init();				//触摸屏初始化
+ 	mem_init();						//初始化内存池	    
+ 	exfuns_init();				//为fatfs相关变量申请内存  
+ 	f_mount(fs[1],"1:",1); //挂载FLASH.
+	POINT_COLOR=RED;
+	while(font_init()) 			//检查字库
+	{	    
+		LCD_ShowString(60,50,240,16,16,"Font Error!");
+		delay_ms(200);				  
+		LCD_Fill(60,50,240,66,WHITE);//清除显示
+		delay_ms(200);		
+	}
+	if(!(tp_dev.touchtype&0x80))//如果是电阻屏
+	{
+		Show_Str_Mid(0,30,"Adjust the touch screen?",16,240);
+		POINT_COLOR=BLUE;
+		Show_Str_Mid(0,60,"YES: KEY1   NO: KEY0",16,240);	
+		while(1)
+		{
+			key_num=KEY_Scan(0);
+			if(key_num==KEY0_PRES)
+				break;
+			if(key_num==KEY1_PRES)
+			{
+				LCD_Clear(WHITE);
+				TP_Adjust();  	 //屏幕校准 
+				TP_Save_Adjdata();//保存校准参数
+				break;				
+			}
+		}
+	}
+	/*加载指纹识别实验界面*/
+	LCD_Clear(WHITE);
+	POINT_COLOR=RED;
+	Show_Str_Mid(0,0,"AS608 Fingerprint module test",16,240);	    			    	 
+	Show_Str_Mid(0,20,"Author: @ALIENTEK",16,240);				    	 
+ 	POINT_COLOR=BLUE;
+	Show_Str_Mid(0,40,"Connect with AS608....",16,240);	
+	while(PS_HandShake(&AS608Addr))//与AS608模块握手
+	{
+		LCD_Fill(0,40,240,80,WHITE);
+		Show_Str_Mid(0,40,"Cannot connect with AS608!",16,240);
+		delay_ms(1000);
+		LCD_Fill(0,40,240,80,WHITE);
+		Show_Str_Mid(0,40,"Try to connect again....",16,240);	
+		delay_ms(1000);	  
+	}
+	LCD_Fill(0,40,240,320,WHITE);
+	Show_Str_Mid(0,40,"Connect success!",16,240);//通讯成功
+	str=mymalloc(30);
+	sprintf(str,"Baudrate:%d   Addr:%x",usart2_baund,AS608Addr);//显示波特率
+	Show_Str(0,60,240,16,(u8*)str,16,0);
+	delay_ms(100);
+	ensure=PS_ValidTempleteNum(&ValidN);//读库指纹个数
+	if(ensure!=0x00)
+		ShowErrMessage(ensure);//显示确认码错误信息	
+	ensure=PS_ReadSysPara(&AS608Para);  //读AS608模块参数 
+	if(ensure==0x00)
+	{
+		mymemset(str,0,50);
+		sprintf(str,"RemainNum:%d    Level:%d",AS608Para.PS_max-ValidN,AS608Para.PS_level);//显示剩余指纹数量和安全等级
+		Show_Str(0,80,240,16,(u8*)str,16,0);
+	}
+	else
+		ShowErrMessage(ensure);	
+	myfree(str);
+	AS608_load_keyboard(0,170,(u8**)kbd_menu);//加载虚拟键盘
+	while(1)
+	{
+		key_num=AS608_get_keynum(0,170);	
+		if(key_num)
+		{
+			if(key_num==1)Del_FR();		//删指纹
+			if(key_num==3)Add_FR();		//录指纹									
+		}
+		if(PS_Sta)	 //检测PS_Sta状态，如果有手指按下
+		{
+			press_FR();//刷指纹			
+		}				 
+	} 	
 }
 
 
@@ -269,7 +360,6 @@ void press_FR(void)
 				Show_Str_Mid(0,100,"Search fingerprint success",16,240);//搜索指纹成功				
 				str=mymalloc(50);
 				sprintf(str,"Match ID:%d  Match score:%d",seach.pageID,seach.mathscore);//显示匹配指纹的ID和分数
-				
 				Show_Str_Mid(0,140,(u8*)str,16,240);
 				myfree(str);
 			}
