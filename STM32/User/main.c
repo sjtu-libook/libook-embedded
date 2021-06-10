@@ -18,6 +18,28 @@ unsigned char TempCompany[][16]=
 	0x00,0x00,0x00,0x07,0x1F,0x30,0x20,0x40,0x40,0x40,0x40,0x40,0x20,0x10,0x00,0x00,/*"¡æ",0*/	
 
 };
+
+
+void LCD_COUT(char* ch, int line) {
+	char dispBuff[200];
+	/********显示变量示例*******/
+	LCD_SetTextColor(GREEN);
+
+	/*转换成字符串*/
+	sprintf(dispBuff, "%s ", ch);
+	/*清除对应行 */
+	LCD_ClearLine(LINE(line));	/* Çå³ýµ¥ÐÐÎÄ×Ö */
+
+	/*显示该字符*/
+	ILI9341_DispStringLine_EN_CH(LINE(line), dispBuff);
+}
+unsigned char charater_matrix[] =
+{ 
+0x01,0x00,0x21,0x08,0x11,0x08,0x09,0x10,0x09,0x20,0x01,0x00,0x7F,0xF8,0x00,	0x08,
+0x00,0x08,0x00,0x08,0x3F,0xF8,0x00,0x08,0x00,0x08,0x00,0x08,0x7F,0xF8,0x00,0x08,
+
+};
+
 void Delay(__IO uint32_t nCount); 
 
 /**
@@ -49,18 +71,35 @@ int main(void)
 			if (rx_stack.data[0] == 'r' && rx_stack.data[1] == 'e' && rx_stack.data[2] == 'q') {
 				if (rx_stack.data[3] == '0' && rx_stack.data[4] == '0') {
 					// get token
+					LCD_OUT("请输入验证码",1);
+					char str[10];
+					index = 0;
 					while (1) {
 						input_num = key_seek(); //一次使能获取一个0-9的数字,如果没有输入则返回10
 						if (input_num != 10) break; //一直循环，直至获取到数字
+						LCD_OUT(to_String(input_num),2);
+						str[index++] = input_num;
 					}
 					// 返回message格式： 1. "True{tocken}" 首次落座   2. "False" 非首次落座  3. "Null" 未落座
 					// 通过get_token函数来获取token，成功失败对应上面的消息格式返回，都是字符串形式返回
-					printf("True%d", 123456); // 这里为了测试固定返回值（偷懒）
+					if (verify(str))
+						printf("True%s", str);
+					else 
+						printf("False");
 				}
 				else if (rx_stack.data[3] == '0' && rx_stack.data[4] == '1') {
 					// get fingerprint id
 					// 返回message格式： 1. "Suc{id}" 返回ID  2. "Null" ID尚未准备
-					printf("Suc%d", 1);
+					LCD_OUT("请验证指纹",1);
+					int id = getFingerprintID();
+					if(id == -1) {
+						printf("Null");
+						LCD_OUT("验证失败",2);
+					}
+					else {
+						printf("Suc%d", id);
+						LCD_OUT("验证成功",2);
+					}
 				}
 				else if (rx_stack.data[3] == '1' && rx_stack.data[4] == '0') {
 					// get temperature
@@ -68,12 +107,23 @@ int main(void)
 					// 这部分已经完成了，已完成获取温度的api，这里直接调用，按照格式返回
 					Temperature = SMBus_ReadTemp();
 					printf("Temp%f", Temperature);
+					int line = 1;
+					LCD_OUT("当前温度", line);
+					char str[10] = convert_toString(Temperature);
+					LCD_OUT(str, line);
+					line++;
 				}
 				else if (rx_stack.data[3] == '1' && rx_stack.data[4] == '1') {
 					// is_leave
 					// message格式: "True"离开 "False"未离开
 					// 只需要有一个变量保存状态即可，需要时返回
-					printf("False");
+					bool state = getState();
+					if(stat) {
+						printf("True");
+					}
+					else {
+						printf("False");
+					}
 				}
 			}
 			rx_stack.lock_flag = 0;
