@@ -1,0 +1,11 @@
+..\obj\diskio.o: ..\FATFS\src\diskio.c
+..\obj\diskio.o: ..\FATFS\src\diskio.h
+..\obj\diskio.o: ..\FATFS\src\integer.h
+..\obj\diskio.o: ..\HARDWARE\SD\mmc_sd.h
+..\obj\diskio.o: ..\SYSTEM\sys\sys.h
+..\obj\diskio.o: ..\SYSTEM\sys\stm32f10x.h
+..\obj\diskio.o: ..\SYSTEM\sys\core_cm3.h
+..\obj\diskio.o: D:\Keil_v5\ARM\ARMCC\Bin\..\include\stdint.h
+..\obj\diskio.o: ..\SYSTEM\sys\system_stm32f10x.h
+..\obj\diskio.o: ..\HARDWARE\FLASH\flash.h
+..\obj\diskio.o: ..\MALLOC\malloc.h
