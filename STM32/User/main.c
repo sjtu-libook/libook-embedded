@@ -84,8 +84,10 @@ int main(void)
 					// 通过get_token函数来获取token，成功失败对应上面的消息格式返回，都是字符串形式返回
 					if (verify(str))
 						printf("True%s", str);
+						LCD_OUT("验证成功",3);
 					else 
 						printf("False");
+						LCD_OUT("验证失败",3);
 				}
 				else if (rx_stack.data[3] == '0' && rx_stack.data[4] == '1') {
 					// get fingerprint id
